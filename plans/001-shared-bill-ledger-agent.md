@@ -90,7 +90,7 @@ monthly n8n cron -> summary email to the owner: rows added, needs_review items, 
     - Never solve a CAPTCHA.
     - On 2FA the broker can't handle, return `blocked_login` with the URL.
 - Register the agent the same way `autoapply` and `jdfinder` are (`ai-automations/openclaw/agents/*`; runbook in `ai-automations/n8n/builders/agent-apply/README.md`). Use a local model route. Browser tool exposed directly (`tools.toolSearch false`, per ai-automations plan 028).
-- **Credential broker:** `ai-automations/n8n/scripts/job-credentials.js` is hard-wired to the `job-sites` vault (`OP_JOB_VAULT`). Add a per-request vault parameter with the default unchanged, so this agent uses a new `ph27-bills` vault. Run the broker's existing tests (`n8n/scripts/test`). That change is committed in ai-automations on its own branch.
+- **Credential broker:** `ai-automations/n8n/scripts/job-credentials.js` is hard-wired to the `job-sites` vault (`OP_JOB_VAULT`). Add a per-request vault parameter with the default unchanged. Each vendor in `rules.yaml` names its vault (see the vault map below). Run the broker's existing tests (`n8n/scripts/test`). That change is committed in ai-automations on its own branch.
 - **Verification (code, not the agent):** run `pdftotext` on the saved PDF and check that the reported total appears in it. On a mismatch or missing file, the row is `needs_review`.
 - **Mixed orders (Amazon / Instacart): phase 2, not in this plan's first cut.** The agent would list line items; code would keep only items matching the cleaning / office keyword lists in `rules.yaml`; anything unmatched goes to `needs_review`.
 
@@ -120,8 +120,17 @@ monthly n8n cron -> summary email to the owner: rows added, needs_review items, 
 - Anything suggests the agent would have to act in a payment flow to see the bill.
 - The Step 2 regression shows differences other than the two whitelisted rows. Report them; don't change the rules.
 
+## Vault map (owner-created 2026-09-30; the owner can move items, and `rules.yaml` follows)
+| Vault | Holds | Used by |
+|---|---|---|
+| `utilities` | Bilt (rent), Pacific Power, NW Natural, Portland Water Bureau, Quantum Fiber, T-Mobile, renters insurer | 001 |
+| `ph27` | ZenBusiness, Namecheap, Anthropic / Claude billing, 1Password billing | 001 receipts, 003 |
+| `ph27-money` | Bluevine, Wave | 004, 005, 006 |
+| `ph27-marketing` | nothing yet | later |
+
 ## Owner actions (before Step 4)
-- [ ] Create a 1Password vault `ph27-bills` with logins for Bilt, Pacific Power, NW Natural, Portland Water Bureau, Quantum Fiber, T-Mobile, and the renters insurer.
+- [x] Vaults created 2026-09-30: `utilities`, `ph27`, `ph27-money`, `ph27-marketing`.
+- [ ] Make sure each vendor login in the vault map below exists in its vault, with the portal URL saved on the item (the broker matches logins by host).
 - [ ] Confirm bills go to `dylan.grant@gmail.com`, or list the other inboxes.
 - [ ] Fill in `paid_from` per vendor in `rules.yaml` (Bilt from BECU; which subscriptions come from the USAA shared account).
 - [ ] Name the renters insurer (the 2025 ledger just says "Insurance").
