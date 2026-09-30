@@ -31,7 +31,7 @@ ph27 pays its share of household bills (rent, utilities, internet, insurance, ph
 
 ## Design
 ```
-Gmail (sender allowlist) --n8n poll--> intake item (message id, sender, subject, body, links)
+monthly n8n cron (3rd, overnight) -> Gmail search: last month's bill emails (sender allowlist) -> one intake item per email
       -> OpenClaw `bookkeeper` agent (browser): open the bill link, sign in via the credential broker,
          save the bill as a PDF, report {vendor, bill_date, amount_total, line_items[], pdf_path, status}
       -> deterministic code: verify the PDF exists and contains the amount -> match rule -> compute share
@@ -96,9 +96,10 @@ monthly n8n cron -> summary email to the owner: rows added, needs_review items, 
 
 ### 5. n8n intake and monthly summary
 - **Intake workflow:**
-  - Poll Gmail every 30 minutes for senders in `rules.yaml` (Bilt, Pacific Power, NW Natural, Portland Water Bureau, Quantum Fiber, T-Mobile, Anthropic / Claude billing, 1Password, Namecheap, ZenBusiness, insurer).
-  - Call the agent, run Steps 2-3, and on a Gmail success label the email `ph27/recorded` or `ph27/needs_review`.
-- **Monthly workflow:** on the 1st, email the owner last month's rows, open `needs_review` items with reasons, the balance owed, and the PDFs attached. A self-addressed summary email is allowed.
+  - **Monthly batch, not polling** (owner 2026-09-30: bills are monthly). On the 3rd, overnight, search Gmail for last month's emails from the senders in `rules.yaml`. Process them one at a time: call the agent, run Steps 2-3, then label each email `ph27/recorded` or `ph27/needs_review`.
+  - Overnight so the agent doesn't compete with the job-apply agent for the one loaded Ollama model; the batch pauses if an apply run is active.
+  - A manual "run now" webhook for one-off catch-up.
+- **Monthly summary:** at the end of the same batch, email the owner last month's rows, open `needs_review` items with reasons, the balance owed, and the PDFs attached. A self-addressed summary email is allowed.
 - Builders live in `business-ops/n8n/`. Push live with the `docker exec n8n` import, per the owner's n8n rule.
 
 ### 6. Backfill Jan-Sep 2026
@@ -150,3 +151,4 @@ monthly n8n cron -> summary email to the owner: rows added, needs_review items, 
 - 2026-09-30 **Owner TODO (owner handling it):** set up Gmail forwarding filters so bill emails from ivygahn@gmail.com and dylan.grant@lovelingo.co (Zoho) arrive in dylan.grant@gmail.com. Step 5 intake assumes this and only polls that one mailbox. Also owner TODO: new 1Password service account scoped to `ph27-ops` + `utilities-expenses` only (current bills token can't see `ph27-ops` and can see `ph27`/`ph27-money`); move USAA, 1Password billing, claude.ai billing logins into `ph27-ops`; rotate tokens exposed by the 2026-09-30 item listing (Ollama, ClawHub, Firecrawl, Browserless).
 - 2026-09-30 Owner decision: no vault access for USAA, 1Password billing, or claude.ai. Those three are **email-only**: the agent records them from the email body and saves the email as the document (no portal fetch; `portal: false` in `rules.yaml`). 1Password is yearly; owner handles it by hand if the email lacks an amount. Claude is a subscription paid from Bluevine (`owner_paid: false`): it is an ph27 expense with nothing owed to the owner, recorded from the receipt email and later confirmed by plan 005's statement parse. Service account needs only `utilities-expenses` + `ph27-ops` (ZenBusiness, Namecheap). Owner is updating the service account and rotating exposed tokens himself.
 - 2026-09-30 Step 4 (in progress): (a) broker patched on ai-automations branch `claude_bizops_plan_01`: per-vault read-only tokens (`utilities-expenses`, `ph27-ops` -> `OP_SERVICE_ACCOUNT_TOKEN_BILLS`), allowlist (any other vault refused, incl. `ph27`/`ph27-money`), signup refused in bill vaults; 54 broker tests pass (3 new). Compose passes the bills token to the `job-credentials` container - **container not yet recreated** (needs `docker compose up -d job-credentials` in `n8n/`; do when no apply run is active). (b) `bookkeeper` agent: manual in `agents/bookkeeper/AGENTS.md` (copied to `~/.openclaw/agents/bookkeeper/workspace/`), registered in `~/.openclaw/openclaw.json` (gemma4:12b, browser tool only, backup in `~/.openclaw-backups/`); gateway hot-reloaded it. (c) Still to do: PDF-amount verification code, smoke test, dry run on 3 real emails.
+- 2026-09-30 Owner decision: agent + n8n split confirmed (agent owns the browser outcome, code owns money). Runs **monthly**, not on every email. One-off Amazon / Instacart orders stay in plan 002, which may be replaced by those vendors' own integrations / MCPs when available.
