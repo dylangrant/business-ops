@@ -140,3 +140,9 @@ monthly n8n cron -> summary email to the owner: rows added, needs_review items, 
 - 003: ZenBusiness compliance calendar (annual report, registered agent) and Namecheap renewal reminders. This is browser-only for ZenBusiness.
 - 004: Wave, if it's upgraded to Pro, or if the Bluevine -> Wave integration turns out to cover it. Post ledger rows as entries against a "Paid by owner" account.
 - 005: detect Bluevine reimbursement transfers and set Reimbursed dates automatically.
+
+## Execution log
+- 2026-09-30 Step 0 done. Step 1 done (MCPs branch `claude_plan_01`, commit 267e10f): root Makefile now drives browserless + jobspy + agent-memory; `make -n start/update` clean. Browserless stays (OpenClaw still references `BROWSERLESS_*` keys); its token now comes from `BROWSERLESS_TOKEN` in `browserless-mcp-server/.env` and compose refuses to start without it. **Owner: set that token.**
+- 2026-09-30 Step 2 done: `rules.yaml` + `bookkeeping/allocate.py`; 73 ph27 rows of the 2025 ledger as fixture (ChatGPT rows excluded, subscription retired). All match to the cent except the two documented differences. Note: the Amazon mixed-order path takes the business subtotal as input (plan 002 produces it).
+- 2026-09-30 Step 3 (code) done: `bookkeeping/ledger.py` - dedupe on Gmail id and on vendor/date/amount, atomic write, bill filing, balance. 82 tests pass (`uv run pytest`). **Not done:** mounting the iCloud folder into the n8n container (touches live compose; do with Step 5). The writer itself runs on the host, so the container mount is only needed if n8n writes directly; the fallback is to have n8n call the host.
+- Branch note: later plan branches (02-08) were cut before this work; rebase them on `claude_plan_01` before merging.
