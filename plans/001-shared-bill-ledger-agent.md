@@ -131,7 +131,7 @@ monthly n8n cron -> summary email to the owner: rows added, needs_review items, 
 ## Owner actions (before Step 4)
 - [x] Vaults created 2026-09-30: `utilities-expenses` (renamed from `utilities`; shared with Ivy; also holds Amazon + Instacart logins for plan 002), `ph27`, `ph27-money`, `ph27-marketing`.
 - [ ] Make sure each vendor login in the vault map below exists in its vault, with the portal URL saved on the item (the broker matches logins by host).
-- [ ] Confirm bills go to `dylan.grant@gmail.com`, or list the other inboxes.
+- [ ] (owner) Forwarding filters: Ivy Gmail + Zoho bill emails -> dylan.grant@gmail.com.
 - [ ] Fill in `paid_from` per vendor in `rules.yaml` (Bilt from BECU; which subscriptions come from the USAA shared account).
 - [ ] Name the renters insurer (the 2025 ledger just says "Insurance").
 
@@ -147,3 +147,4 @@ monthly n8n cron -> summary email to the owner: rows added, needs_review items, 
 - 2026-09-30 Step 3 (code) done: `bookkeeping/ledger.py` - dedupe on Gmail id and on vendor/date/amount, atomic write, bill filing, balance. 82 tests pass (`uv run pytest`). **Not done:** mounting the iCloud folder into the n8n container (touches live compose; do with Step 5). The writer itself runs on the host, so the container mount is only needed if n8n writes directly; the fallback is to have n8n call the host.
 - Branch note: later plan branches (02-08) were cut before this work; rebase them on `claude_plan_01` before merging.
 - 2026-09-30 Owner inputs: bills arrive at dylan.grant@gmail.com, ivygahn@gmail.com, and possibly dylan.grant@lovelingo.co (Zoho); insurer is USAA; Quantum Fiber is paid from USAA, everything else from BECU; Bilt login deferred (it is a credit card). Bills service account `OP_SERVICE_ACCOUNT_TOKEN_BILLS` verified working; vault `utilities-expenses` has Portland Water, NW Natural, Pacific Power, Quantum Fiber, T-Mobile (two items), Instacart, Amazon (two items), all with portal URLs. **Missing:** a USAA login. **Open:** the `ph27` vault is large (see note in chat); scope the service account before Step 4. **Open:** intake needs access to the Ivy Gmail and Zoho inboxes (prefer forwarding to one mailbox).
+- 2026-09-30 **Owner TODO (owner handling it):** set up Gmail forwarding filters so bill emails from ivygahn@gmail.com and dylan.grant@lovelingo.co (Zoho) arrive in dylan.grant@gmail.com. Step 5 intake assumes this and only polls that one mailbox. Also owner TODO: new 1Password service account scoped to `ph27-ops` + `utilities-expenses` only (current bills token can't see `ph27-ops` and can see `ph27`/`ph27-money`); move USAA, 1Password billing, claude.ai billing logins into `ph27-ops`; rotate tokens exposed by the 2026-09-30 item listing (Ollama, ClawHub, Firecrawl, Browserless).
