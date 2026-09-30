@@ -24,8 +24,11 @@ a new tab: `{"action":"tabs"}`, continue in it, report its id as `targetId`.
    `{"action":"snapshot","targetId":"t1","profile":"openclaw","refs":"aria","mode":"efficient","depth":40}`
    If it is loading or redirecting, wait
    (`{"action":"act","targetId":"t1","profile":"openclaw","kind":"wait","timeMs":3000}`) and snapshot again.
-2. **Sign-in page?** Return `blocked_login` (see below). You will be called
-   again once signed in.
+2. **Signing in.** If the page only has a "Sign in" / "Log in" / "My account"
+   link or button, CLICK it and snapshot again - that is not the sign-in form.
+   Return `blocked_login` only when a visible username/email text box is on
+   screen (with or without a password box). Take a fresh snapshot right before
+   answering and use refs from it. You will be called again once signed in.
 3. **Find the bill.** Go to the statement / bill / billing history for the most
    recent bill that matches the goal's `billDate` or `amountHint` (if given).
    Use links named "View bill", "View statement", "Billing history", "Invoices",
