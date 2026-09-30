@@ -123,13 +123,13 @@ monthly n8n cron -> summary email to the owner: rows added, needs_review items, 
 ## Vault map (owner-created 2026-09-30; the owner can move items, and `rules.yaml` follows)
 | Vault | Holds | Used by |
 |---|---|---|
-| `utilities` | Bilt (rent), Pacific Power, NW Natural, Portland Water Bureau, Quantum Fiber, T-Mobile, renters insurer | 001 |
+| `utilities-expenses` | Bilt (rent), Pacific Power, NW Natural, Portland Water Bureau, Quantum Fiber, T-Mobile, renters insurer, Amazon, Instacart | 001 |
 | `ph27` | ZenBusiness, Namecheap, Anthropic / Claude billing, 1Password billing | 001 receipts, 003 |
 | `ph27-money` | Bluevine, Wave | 004, 005, 006 |
 | `ph27-marketing` | nothing yet | later |
 
 ## Owner actions (before Step 4)
-- [x] Vaults created 2026-09-30: `utilities`, `ph27`, `ph27-money`, `ph27-marketing`.
+- [x] Vaults created 2026-09-30: `utilities-expenses` (renamed from `utilities`; shared with Ivy; also holds Amazon + Instacart logins for plan 002), `ph27`, `ph27-money`, `ph27-marketing`.
 - [ ] Make sure each vendor login in the vault map below exists in its vault, with the portal URL saved on the item (the broker matches logins by host).
 - [ ] Confirm bills go to `dylan.grant@gmail.com`, or list the other inboxes.
 - [ ] Fill in `paid_from` per vendor in `rules.yaml` (Bilt from BECU; which subscriptions come from the USAA shared account).

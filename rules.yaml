@@ -6,13 +6,13 @@ home_office:
 
 # paid_from: fill in per vendor (owner action). vault: where the portal login lives.
 vendors:
-  - {key: rent,           match: [rent, bilt],                  category: Rent,                       share: "0.05", vault: utilities, paid_from: "BECU via Bilt"}
-  - {key: pacific_power,  match: [pacific power],               category: Utilities,                  share: "0.05", vault: utilities}
-  - {key: nw_natural,     match: [nw natural],                  category: Utilities,                  share: "0.05", vault: utilities}
-  - {key: portland_water, match: [portland water],              category: Utilities,                  share: "0.05", vault: utilities}
-  - {key: internet,       match: [quantum fiber, centurylink, century link], category: Utilities,      share: "0.50", vault: utilities, note_label: internet}
-  - {key: insurance,      match: [insurance],                   category: Insurance (non-health),     share: "0.05", vault: utilities}
-  - {key: t_mobile,       match: [t-mobile],                    category: Telephone,                  share: "0.25", vault: utilities}
+  - {key: rent,           match: [rent, bilt],                  category: Rent,                       share: "0.05", vault: utilities-expenses, paid_from: "BECU via Bilt"}
+  - {key: pacific_power,  match: [pacific power],               category: Utilities,                  share: "0.05", vault: utilities-expenses}
+  - {key: nw_natural,     match: [nw natural],                  category: Utilities,                  share: "0.05", vault: utilities-expenses}
+  - {key: portland_water, match: [portland water],              category: Utilities,                  share: "0.05", vault: utilities-expenses}
+  - {key: internet,       match: [quantum fiber, centurylink, century link], category: Utilities,      share: "0.50", vault: utilities-expenses, note_label: internet}
+  - {key: insurance,      match: [insurance],                   category: Insurance (non-health),     share: "0.05", vault: utilities-expenses}
+  - {key: t_mobile,       match: [t-mobile],                    category: Telephone,                  share: "0.25", vault: utilities-expenses}
   - {key: onepassword,    match: [1password],                   category: Dues and Subscriptions,     share: "0.50", vault: ph27}
   - {key: claude,         match: [claude, anthropic],           category: Dues and Subscriptions,     share: "1.00", vault: ph27}
   - {key: namecheap,      match: [namecheap],                   category: Dues and Subscriptions,     share: "1.00", vault: ph27}
