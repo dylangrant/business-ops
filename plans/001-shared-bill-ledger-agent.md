@@ -124,7 +124,7 @@ monthly n8n cron -> summary email to the owner: rows added, needs_review items, 
 | Vault | Holds | Used by |
 |---|---|---|
 | `utilities-expenses` | Bilt (rent), Pacific Power, NW Natural, Portland Water Bureau, Quantum Fiber, T-Mobile, renters insurer, Amazon, Instacart | 001 |
-| `ph27` | ZenBusiness, Namecheap, Anthropic / Claude billing, 1Password billing | 001 receipts, 003 |
+| `ph27-ops` | ZenBusiness, Namecheap | 001 receipts, 003 |
 | `ph27-money` | Bluevine, Wave | 004, 005, 006 |
 | `ph27-marketing` | nothing yet | later |
 

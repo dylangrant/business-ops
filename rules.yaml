@@ -17,9 +17,9 @@ vendors:
   - {key: t_mobile,       match: [t-mobile],                    category: Telephone,                  share: "0.25", vault: utilities-expenses, paid_from: "BECU"}
   - {key: onepassword,    match: [1password],                   category: Dues and Subscriptions,     share: "0.50", portal: false}
   - {key: claude,         match: [claude, anthropic],           category: Dues and Subscriptions,     share: "1.00", portal: false, owner_paid: false, paid_from: "Bluevine"}
-  - {key: namecheap,      match: [namecheap],                   category: Dues and Subscriptions,     share: "1.00", vault: ph27}
-  - {key: shopify,        match: [shopify],                     category: Dues and Subscriptions,     share: "1.00", vault: ph27}
-  - {key: zenbusiness,    match: [zenbusiness],                 category: Legal and Professional,     share: "1.00", vault: ph27}
+  - {key: namecheap,      match: [namecheap],                   category: Dues and Subscriptions,     share: "1.00", vault: ph27-ops}
+  - {key: shopify,        match: [shopify],                     category: Dues and Subscriptions,     share: "1.00", vault: ph27-ops}
+  - {key: zenbusiness,    match: [zenbusiness],                 category: Legal and Professional,     share: "1.00", vault: ph27-ops}
 
 # Mixed orders (plan 002): the share applies to the business-item subtotal, by item category.
 mixed_vendors:
