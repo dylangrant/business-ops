@@ -4,15 +4,15 @@ home_office:
   business_sqft: 100
   home_sqft: 2000          # 100 / 2000 = 5%
 
-# paid_from: fill in per vendor (owner action). vault: where the portal login lives.
+# paid_from per owner 2026-09-30: everything BECU except Quantum Fiber (USAA, shared with Ivy); Bilt is a credit card, rent still from BECU. Subscriptions: fill in when known. vault: where the portal login lives.
 vendors:
-  - {key: rent,           match: [rent, bilt],                  category: Rent,                       share: "0.05", vault: utilities-expenses, paid_from: "BECU via Bilt"}
-  - {key: pacific_power,  match: [pacific power],               category: Utilities,                  share: "0.05", vault: utilities-expenses}
-  - {key: nw_natural,     match: [nw natural],                  category: Utilities,                  share: "0.05", vault: utilities-expenses}
-  - {key: portland_water, match: [portland water],              category: Utilities,                  share: "0.05", vault: utilities-expenses}
-  - {key: internet,       match: [quantum fiber, centurylink, century link], category: Utilities,      share: "0.50", vault: utilities-expenses, note_label: internet}
-  - {key: insurance,      match: [insurance],                   category: Insurance (non-health),     share: "0.05", vault: utilities-expenses}
-  - {key: t_mobile,       match: [t-mobile],                    category: Telephone,                  share: "0.25", vault: utilities-expenses}
+  - {key: rent,           match: [rent, bilt],                  category: Rent,                       share: "0.05", vault: utilities-expenses, paid_from: "BECU"}
+  - {key: pacific_power,  match: [pacific power],               category: Utilities,                  share: "0.05", vault: utilities-expenses, paid_from: "BECU"}
+  - {key: nw_natural,     match: [nw natural],                  category: Utilities,                  share: "0.05", vault: utilities-expenses, paid_from: "BECU"}
+  - {key: portland_water, match: [portland water],              category: Utilities,                  share: "0.05", vault: utilities-expenses, paid_from: "BECU"}
+  - {key: internet,       match: [quantum fiber, centurylink, century link], category: Utilities,      share: "0.50", vault: utilities-expenses, note_label: internet, paid_from: "USAA (shared with Ivy)"}
+  - {key: insurance,      match: [insurance, usaa],                   category: Insurance (non-health),     share: "0.05", vault: utilities-expenses, paid_from: "BECU"}
+  - {key: t_mobile,       match: [t-mobile],                    category: Telephone,                  share: "0.25", vault: utilities-expenses, paid_from: "BECU"}
   - {key: onepassword,    match: [1password],                   category: Dues and Subscriptions,     share: "0.50", vault: ph27}
   - {key: claude,         match: [claude, anthropic],           category: Dues and Subscriptions,     share: "1.00", vault: ph27}
   - {key: namecheap,      match: [namecheap],                   category: Dues and Subscriptions,     share: "1.00", vault: ph27}
