@@ -1,0 +1,23 @@
+# ph27 bookkeeping service. Joins the ai-automations "automation" network so n8n,
+# the OpenClaw gateway proxy and the credential broker can reach it / be reached.
+services:
+  bookkeeping:
+    build: ./service
+    container_name: ph27-bookkeeping
+    restart: unless-stopped
+    environment:
+      - BOOKKEEPING_TOKEN=${BOOKKEEPING_TOKEN:?set BOOKKEEPING_TOKEN in .env}
+      - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN:?}
+      - BROKER_TOKEN=${BROKER_TOKEN:?}
+      - GATEWAY_URL=http://gateway-tailnet-proxy:8080
+      - BROKER_URL=http://job-credentials:8090/resolve
+      - PH27_LEDGER_ROOT=/ledger
+      - BROWSER_MEDIA_DIR=/media/browser
+    volumes:
+      - ./:/app:ro
+      - "${PH27_LEDGER_HOST_DIR:?}:/ledger"
+      - ${HOME}/docker/shared/screenshots:/media/browser:ro
+    networks: [automation]
+networks:
+  automation:
+    external: true
