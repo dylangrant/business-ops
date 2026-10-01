@@ -161,3 +161,10 @@ monthly n8n cron -> summary email to the owner: rows added, needs_review items, 
     - The broker clears the password field whenever its submit fails.
     - The broker dismisses overlays and falls back to pressing Enter in the password box.
     - The orchestrator never re-invokes the agent while a password box still holds a value.
+- 2026-10-01 Re-test after the broker fixes: the agent reached the sign-in iframe again. The broker's click on "Sign in" failed ("not visible"), focusing the password box failed too, and the whole call ran past 120 s. The page stayed on `idm/guest-pay-login` (title "Sign in"). The scrub could not reach the password box (also "not visible"), so the tab was closed instead of snapshotted.
+  - Likely cause: an overlay covering the iframe, so the iframe elements count as not visible.
+  - Note: the vault item's saved URL is the **guest-pay** login page; the account sign-in page may be a better entry.
+- Open next steps:
+  - The agent closes popups / overlays before returning `blocked_login`.
+  - Start Pacific Power from its account sign-in URL instead of the homepage.
+  - The broker closes the tab whenever its scrub fails.
