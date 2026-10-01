@@ -26,6 +26,8 @@ a new tab: `{"action":"tabs"}`, continue in it, report its id as `targetId`.
    (`{"action":"act","targetId":"t1","profile":"openclaw","kind":"wait","timeMs":3000}`) and snapshot again.
 2. **Signing in.** If the page only has a "Sign in" / "Log in" / "My account"
    link or button, CLICK it and snapshot again - that is not the sign-in form.
+   Before returning, CLOSE any popup, survey, chat bubble or banner that sits
+   over the page ("No, thanks", "Close", "X") and snapshot again.
    Return `blocked_login` only when a visible username/email text box is on
    screen (with or without a password box). Take a fresh snapshot right before
    answering and use refs from it. You will be called again once signed in.
