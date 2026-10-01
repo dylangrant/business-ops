@@ -176,3 +176,30 @@ monthly n8n cron -> summary email to the owner: rows added, needs_review items, 
     2. A per-vendor `bills_url` (deep link to billing history / statements) in `rules.yaml`, so the agent starts at the bill list instead of exploring.
     3. Prefer the bill PDF from the email when the vendor attaches or links it; use the portal only as a fallback.
 - 2026-10-01 Done: URL guard (`bookkeeping/guard.py`, tested) + watchdog in `scripts/live_fetch.py` that polls the tab every 4 s and closes it on any payment URL; verified live on `example.com/payments`. Note: the Pacific Power vault item URL (`idm/guest-pay-login`) is itself blocked - owner to change it to the `idm/login` sign-in page. **Waiting on owner:** per-vendor billing-history URLs (`bills_url`) and whether bill emails attach the PDF. The watchdog must move into the Step 5 n8n workflow too.
+- 2026-10-01 (overnight, no owner) Step 5 built:
+  - **`ph27-bookkeeping` service** (`service/`, `docker-compose.yml`, on the `automation` network; tokens in the gitignored `.env`):
+    - `POST /process` turns one email into a ledger row. Portal vendors go through `bookkeeping/fetch.py`: agent <-> broker, text-box guard, payment-URL watchdog, tab always closed. Email-only vendors use a labeled-total regex and save the email text as the document.
+    - `POST /summary` returns the monthly email.
+    - The iCloud ledger folder mounts read-write and works, so the earlier STOP concern is resolved.
+    - Tests: 109.
+  - **n8n "ph27 Monthly Bills"** (`Ph27MonthlyBills`, builder `n8n/build_monthly.py`):
+    - Runs on the 3rd at 03:00, or by hand.
+    - Gmail-searches last month's mail from the `rules.yaml` senders, posts each email to `/process` one at a time, then posts to `/summary` and emails the owner.
+    - Successful executions are not saved (bill data stays out of the n8n DB).
+    - Imported **inactive**: n8n has no Gmail credential yet.
+    - Token credential `Ph27BookkeepTk1` created.
+  - Other changes: `rules.yaml` gets `senders` (guessed domains, VERIFY against real emails) and `start_url` (to be replaced by billing-history URLs). A `needs_review` row is replaced when the same email is re-processed. The bookkeeper model is now `qwen3.8:27b`.
+  - Not done yet:
+    - Gmail labels.
+    - Real PDF attachments in the summary (the summary lists file paths).
+    - Cancelling an orphaned agent session when the service times out (the fetch timeout is 20 min; the gateway hard timeout ends it).
+- **Owner, to finish Step 5:**
+  1. In the n8n UI, connect a Gmail credential on "Bill Emails" and "Email Owner".
+  2. Billing-history URLs per utility.
+  3. Pacific Power item URL -> `idm/login`.
+  4. Forwarding filters.
+  5. Then I run "Run Now" for September as the live dry run.
+- Also done overnight:
+  - The OpenClaw daily backup job was failing (`~/.openclaw-backups/git` was never `git init`ed). Fixed and verified with a manual backup commit.
+  - The OpenClaw heartbeat is off (`agents.defaults.heartbeat.every: "0m"`). It was keeping gemma4:12b (~8 GB) loaded.
+  - Plan branches 02-08 rebased onto `claude_plan_01`.
