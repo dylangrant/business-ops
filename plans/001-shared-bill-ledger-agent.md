@@ -168,3 +168,10 @@ monthly n8n cron -> summary email to the owner: rows added, needs_review items, 
   - The agent closes popups / overlays before returning `blocked_login`.
   - Start Pacific Power from its account sign-in URL instead of the homepage.
   - The broker closes the tab whenever its scrub fails.
+- 2026-10-01 Pacific Power on qwen3.8:27b:
+  - Sign-in WORKED: the broker reported `logged_in` after its Enter fallback. The broker now clears the password box after every submit, because iframe forms can read as logged in with the value still there.
+  - The agent then spent ~25 min clicking through iframes and ended on `/secure/my-account/payments` ("Pay My Bill"). It typed nothing there, but it was on the payments page, so the run was stopped by closing the tab.
+  - Needed before the next live run:
+    1. A code-side URL guard: the orchestrator watches the tab URL and closes it on any pay / payment / autopay / wallet path. The prompt rule alone is not enough.
+    2. A per-vendor `bills_url` (deep link to billing history / statements) in `rules.yaml`, so the agent starts at the bill list instead of exploring.
+    3. Prefer the bill PDF from the email when the vendor attaches or links it; use the portal only as a fallback.
