@@ -54,8 +54,11 @@ class Ledger:
         return False
 
     def add(self, e: Entry) -> bool:
-        """Returns False (and writes nothing) when the entry duplicates an existing row."""
+        """Returns False (and writes nothing) when the entry duplicates an existing row.
+        A needs_review row for the same email is replaced, so a re-run can resolve it."""
         rows = self.rows()
+        if e.source:
+            rows = [r for r in rows if not (r["Source"] == e.source and r["Status"] == "needs_review")]
         if self._is_duplicate(e, rows):
             return False
         rows.append({

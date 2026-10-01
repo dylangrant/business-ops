@@ -4,22 +4,24 @@ home_office:
   business_sqft: 100
   home_sqft: 2000          # 100 / 2000 = 5%
 
+# senders: email address/domain substrings that identify the vendor's bill emails (VERIFY against real emails).
+# start_url: where the agent starts when it must sign in; replace with the billing-history URL (owner, pending).
 # portal: false = owner does not vault this login; bill comes from the email body only (no portal fetch).
 # owner_paid: false = paid by ph27 directly (Bluevine); nothing is owed to the owner.
 # paid_from per owner 2026-09-30: everything BECU except Quantum Fiber (USAA, shared with Ivy); Bilt is a credit card, rent still from BECU. Subscriptions: fill in when known. vault: where the portal login lives.
 vendors:
-  - {key: rent,           match: [rent, bilt],                  category: Rent,                       share: "0.05", vault: utilities-expenses, paid_from: "BECU"}
-  - {key: pacific_power,  match: [pacific power],               category: Utilities,                  share: "0.05", vault: utilities-expenses, paid_from: "BECU"}
-  - {key: nw_natural,     match: [nw natural],                  category: Utilities,                  share: "0.05", vault: utilities-expenses, paid_from: "BECU"}
-  - {key: portland_water, match: [portland water],              category: Utilities,                  share: "0.05", vault: utilities-expenses, paid_from: "BECU"}
-  - {key: internet,       match: [quantum fiber, centurylink, century link], category: Utilities,      share: "0.50", vault: utilities-expenses, note_label: internet, paid_from: "USAA (shared with Ivy)"}
-  - {key: insurance,      match: [insurance, usaa],                   category: Insurance (non-health),     share: "0.05", portal: false, paid_from: "BECU"}
-  - {key: t_mobile,       match: [t-mobile],                    category: Telephone,                  share: "0.25", vault: utilities-expenses, paid_from: "BECU"}
-  - {key: onepassword,    match: [1password],                   category: Dues and Subscriptions,     share: "0.50", portal: false}
-  - {key: claude,         match: [claude, anthropic],           category: Dues and Subscriptions,     share: "1.00", portal: false, owner_paid: false, paid_from: "Bluevine"}
-  - {key: namecheap,      match: [namecheap],                   category: Dues and Subscriptions,     share: "1.00", vault: ph27-ops}
-  - {key: shopify,        match: [shopify],                     category: Dues and Subscriptions,     share: "1.00", vault: ph27-ops}
-  - {key: zenbusiness,    match: [zenbusiness],                 category: Legal and Professional,     share: "1.00", vault: ph27-ops}
+  - {key: rent,           match: [rent, bilt],                  category: Rent,                       share: "0.05", vault: utilities-expenses, paid_from: "BECU", senders: [bilt], start_url: "", portal: false}
+  - {key: pacific_power,  match: [pacific power],               category: Utilities,                  share: "0.05", vault: utilities-expenses, paid_from: "BECU", senders: [pacificpower.net], start_url: "https://www.pacificpower.net/"}
+  - {key: nw_natural,     match: [nw natural],                  category: Utilities,                  share: "0.05", vault: utilities-expenses, paid_from: "BECU", senders: [nwnatural.com], start_url: "https://www.nwnatural.com/"}
+  - {key: portland_water, match: [portland water],              category: Utilities,                  share: "0.05", vault: utilities-expenses, paid_from: "BECU", senders: [portlandoregon.gov], start_url: "https://css.portlandoregon.gov/css/public/login"}
+  - {key: internet,       match: [quantum fiber, centurylink, century link], category: Utilities,      share: "0.50", vault: utilities-expenses, note_label: internet, paid_from: "USAA (shared with Ivy)", senders: [quantumfiber.com, lumen.com, centurylink.com], start_url: "https://login.quantumfiber.com"}
+  - {key: insurance,      match: [insurance, usaa],                   category: Insurance (non-health),     share: "0.05", portal: false, paid_from: "BECU", senders: [usaa.com]}
+  - {key: t_mobile,       match: [t-mobile],                    category: Telephone,                  share: "0.25", vault: utilities-expenses, paid_from: "BECU", senders: [t-mobile.com], start_url: "https://account.t-mobile.com/"}
+  - {key: onepassword,    match: [1password],                   category: Dues and Subscriptions,     share: "0.50", portal: false, senders: [1password.com]}
+  - {key: claude,         match: [claude, anthropic],           category: Dues and Subscriptions,     share: "1.00", portal: false, owner_paid: false, paid_from: "Bluevine", senders: [anthropic.com]}
+  - {key: namecheap,      match: [namecheap],                   category: Dues and Subscriptions,     share: "1.00", vault: ph27-ops, senders: [namecheap.com], portal: false}
+  - {key: shopify,        match: [shopify],                     category: Dues and Subscriptions,     share: "1.00", vault: ph27-ops, senders: [shopify.com], portal: false}
+  - {key: zenbusiness,    match: [zenbusiness],                 category: Legal and Professional,     share: "1.00", vault: ph27-ops, senders: [zenbusiness.com], portal: false}
 
 # Mixed orders (plan 002): the share applies to the business-item subtotal, by item category.
 mixed_vendors:
