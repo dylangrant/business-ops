@@ -1,0 +1,15 @@
+"""URL guard for the bookkeeper's browser tab: payment pages are off-limits, enforced in code."""
+import re
+from urllib.parse import urlparse
+
+# Path/query words that mean "money can move from here". Matched as whole path
+# segments or word parts so "/statements" or "/billing-history" stay allowed.
+FORBIDDEN = re.compile(
+    r"(?:^|[/_\-.?=&])(?:pay|payment|payments|paybill|pay-bill|pay-my-bill|make-?a-?payment|autopay|auto-?pay|"
+    r"wallet|checkout|guest-?pay|billpay|bill-pay|recurring-?payment|payment-?method|add-?card)(?:$|[/_\-.?=&])",
+    re.I)
+
+
+def is_forbidden(url: str) -> bool:
+    p = urlparse(url or "")
+    return bool(FORBIDDEN.search(p.path + ("?" + p.query if p.query else "")))

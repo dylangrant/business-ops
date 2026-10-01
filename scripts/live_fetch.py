@@ -4,7 +4,11 @@ Usage: python3 scripts/live_fetch.py "Pacific Power" https://www.pacificpower.ne
 Runs the same loop the n8n intake workflow will run (Step 5). Never snapshots a page after
 the broker has typed, because snapshots expose input values.
 """
-import json, re, subprocess, sys, uuid
+import json, re, subprocess, sys, threading, uuid
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from bookkeeping.guard import is_forbidden
 
 AI = "/Users/dylangrant/dev/me/ai-automations"
 env = {}
@@ -27,6 +31,26 @@ def browser(args):
     return post(GW + "/tools/invoke", {"tool": "browser", "agentId": "bookkeeper", "args": {"profile": "openclaw", **args}}, env["OPENCLAW_GATEWAY_TOKEN"], 60)
 
 
+class Watchdog:
+    """Polls the tab URL while the agent runs; closes the tab on any payment page."""
+    def __init__(self, tab):
+        self.tab, self.tripped, self._stop = tab, "", threading.Event()
+        self._t = threading.Thread(target=self._run, daemon=True)
+
+    def _run(self):
+        while not self._stop.wait(4):
+            r = browser({"action": "act", "kind": "evaluate", "fn": "() => location.href", "targetId": self.tab})
+            url = r.get("result", {}).get("details", {}).get("result") or ""
+            if isinstance(url, str) and is_forbidden(url):
+                self.tripped = url
+                browser({"action": "close", "targetId": self.tab})
+                print("GUARD: payment page, tab closed:", url, flush=True)
+                return
+
+    def __enter__(self): self._t.start(); return self
+    def __exit__(self, *a): self._stop.set(); self._t.join(timeout=10)
+
+
 def agent(msg):
     r = post(GW + "/v1/chat/completions", {"model": "openclaw/bookkeeper", "user": "bk-" + uuid.uuid4().hex[:8],
              "messages": [{"role": "user", "content": msg}]}, env["OPENCLAW_GATEWAY_TOKEN"], 900)
@@ -42,7 +66,11 @@ def main(vendor, start_url, vault):
     goal = (f"targetId {tab}, profile openclaw. vendor: {vendor}. billUrl: {start_url} (already loaded). "
             "Sign in (return blocked_login at the sign-in form), then find the most recent bill and save it as a PDF. Answer with the final JSON.")
     for rnd in range(5):
-        a = agent(goal); print("agent", rnd, json.dumps(a)[:600], flush=True)
+        with Watchdog(tab) as wd:
+            a = agent(goal)
+        print("agent", rnd, json.dumps(a)[:600], flush=True)
+        if wd.tripped:
+            return {"status": "guard_stopped", "url": wd.tripped}
         if a.get("status") != "blocked_login":
             return a
         tid = a.get("targetId") or tab

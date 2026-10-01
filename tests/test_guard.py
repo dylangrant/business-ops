@@ -1,0 +1,27 @@
+import pytest
+
+from bookkeeping.guard import is_forbidden
+
+
+@pytest.mark.parametrize("url", [
+    "https://csapps.pacificpower.net/secure/my-account/payments",
+    "https://csapps.pacificpower.net/idm/guest-pay-login",
+    "https://x.com/billing/autopay",
+    "https://x.com/account/pay-my-bill",
+    "https://x.com/checkout?step=1",
+    "https://x.com/settings/payment-method",
+    "https://x.com/a?action=pay",
+])
+def test_payment_pages_blocked(url):
+    assert is_forbidden(url)
+
+
+@pytest.mark.parametrize("url", [
+    "https://csapps.pacificpower.net/secure/my-account/billing-history",
+    "https://x.com/account/statements",
+    "https://x.com/bills/2026-09.pdf",
+    "https://www.pacificpower.net/",
+    "",
+])
+def test_bill_pages_allowed(url):
+    assert not is_forbidden(url)
