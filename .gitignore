@@ -4,3 +4,4 @@ __pycache__/
 .env
 *.pdf
 ledger-*.csv
+n8n/build/
