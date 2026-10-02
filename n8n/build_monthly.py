@@ -19,6 +19,7 @@ gmail_q = "from:(" + " OR ".join(senders) + ") after:{{ $('Month Range').first()
 SVC = "http://ph27-bookkeeping:8091"
 TOKEN_CRED = {"httpHeaderAuth": {"id": "Ph27BookkeepTk1", "name": "ph27 bookkeeping token"}}
 OWNER = "dylan.grant@gmail.com"
+GMAIL_CRED = {"gmailOAuth2": {"id": "raqZCbXfJO1misFR", "name": "Gmail account"}}
 
 
 def n(name, typ, ver, pos, params, **extra):
@@ -33,7 +34,7 @@ nodes = [
     n("Month Range", "n8n-nodes-base.code", 2, [220, 100], {"jsCode": (HERE / "nodes_month_range.js").read_text()}),
     n("Bill Emails", "n8n-nodes-base.gmail", 2.1, [440, 100],
       {"resource": "message", "operation": "getAll", "returnAll": True, "simple": False,
-       "filters": {"q": "=" + gmail_q}, "options": {}}, alwaysOutputData=True),
+       "filters": {"q": "=" + gmail_q}, "options": {}}, alwaysOutputData=True, credentials=GMAIL_CRED),
     n("To Email", "n8n-nodes-base.code", 2, [660, 100],
       {"mode": "runOnceForEachItem", "jsCode": (HERE / "nodes_to_email.js").read_text()}),
     n("One At A Time", "n8n-nodes-base.splitInBatches", 3, [880, 100], {"batchSize": 1, "options": {}}),
@@ -49,7 +50,7 @@ nodes = [
     n("Email Owner", "n8n-nodes-base.gmail", 2.1, [1320, 0],
       {"resource": "message", "operation": "send", "sendTo": OWNER, "subject": "={{ $json.subject }}",
        "emailType": "text", "message": "={{ $json.body + '\\nBills: ' + ($json.attachments || []).join('\\n  ') }}",
-       "options": {"appendAttribution": False}}),
+       "options": {"appendAttribution": False}}, credentials=GMAIL_CRED),
 ]
 c = {
     "Monthly Schedule": [["Month Range"]], "Run Now": [["Month Range"]], "Month Range": [["Bill Emails"]],

@@ -10,6 +10,11 @@ FORBIDDEN = re.compile(
     re.I)
 
 
+# Read-only history pages that happen to contain the word "payment" (Pacific Power's
+# bills live at /billing-payment-history). Removed before the check, nothing else is.
+HISTORY = re.compile(r"(?:billing-)?payments?[-_]?history", re.I)
+
+
 def is_forbidden(url: str) -> bool:
     p = urlparse(url or "")
-    return bool(FORBIDDEN.search(p.path + ("?" + p.query if p.query else "")))
+    return bool(FORBIDDEN.search(HISTORY.sub("history", p.path + ("?" + p.query if p.query else ""))))

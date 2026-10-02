@@ -24,10 +24,16 @@ class Email:
     links: list[str] = field(default_factory=list)
 
 
-def vendor_for(rules: dict, sender: str) -> dict | None:
+def vendor_for(rules: dict, sender: str, subject: str = "", text: str = "") -> dict | None:
+    """Match on the sender; for a forwarded email, on a vendor domain in the body. An optional
+    per-vendor `subject` regex keeps a vendor's non-bill mail (bank alerts, promos) out."""
     s = sender.lower()
+    forwarded = any(f in s for f in rules.get("forwarders", []))
+    hay = text.lower()[:5000] if forwarded else s
     for v in rules["vendors"]:
-        if any(m in s for m in v.get("senders", [])):
+        if any(m in hay for m in v.get("senders", [])):
+            if v.get("subject") and not re.search(v["subject"], subject, re.I):
+                return None
             return v
     return None
 
@@ -46,7 +52,7 @@ def _parse_date(s: str, fallback: date) -> date:
 
 
 def process(email: Email, rules: dict, ledger: Ledger, fetcher=None, media_dir: Path | None = None) -> dict:
-    v = vendor_for(rules, email.sender)
+    v = vendor_for(rules, email.sender, email.subject, email.text)
     if not v:
         return {"status": "ignored", "reason": f"no vendor rule for sender {email.sender}"}
     name = v["match"][0].title() if v["key"] != "internet" else "Quantum Fiber"
