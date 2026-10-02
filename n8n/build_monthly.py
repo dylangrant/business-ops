@@ -14,7 +14,7 @@ import yaml
 
 HERE = Path(__file__).parent
 rules = yaml.safe_load((HERE.parent / "rules.yaml").read_text())
-senders = sorted({s for v in rules["vendors"] for s in v.get("senders", [])})
+senders = sorted({s for v in rules["vendors"] for s in v.get("senders", [])} | set(rules.get("forwarders", [])))
 gmail_q = "from:(" + " OR ".join(senders) + ") after:{{ $('Month Range').first().json.after }} before:{{ $('Month Range').first().json.before }}"
 SVC = "http://ph27-bookkeeping:8091"
 TOKEN_CRED = {"httpHeaderAuth": {"id": "Ph27BookkeepTk1", "name": "ph27 bookkeeping token"}}
