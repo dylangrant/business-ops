@@ -1,6 +1,7 @@
 """HTTP front end n8n calls each month. n8n schedules and labels; this service owns the rules and money.
 
 POST /process  {"email": {id, sender, subject, date, text, links}}  -> process() result
+POST /fixed    {"month": "YYYY-MM"}                                  -> fixed monthly rows (rent, T-Mobile, renters)
 POST /summary  {"month": "YYYY-MM"}                                  -> {subject, body, attachments}
 GET  /health
 """
@@ -15,6 +16,7 @@ from pathlib import Path
 from bookkeeping import summary
 from bookkeeping.allocate import load_rules
 from bookkeeping.fetch import Endpoints, Fetcher
+from bookkeeping.fixed import record_month
 from bookkeeping.ledger import Ledger
 from bookkeeping.process import Email, process
 
@@ -58,6 +60,8 @@ class H(BaseHTTPRequestHandler):
                              e.get("text", ""), e.get("links", []))
                 with LOCK:
                     return self._send(200, {"ok": True, **process(mail, load_rules(), Ledger(), fetcher(), MEDIA)})
+            if self.path == "/fixed":
+                return self._send(200, {"ok": True, "entries": record_month(load_rules(), Ledger(), body["month"])})
             if self.path == "/summary":
                 return self._send(200, {"ok": True, **summary.build(Ledger(), body["month"])})
             return self._send(404, {"ok": False})

@@ -42,6 +42,11 @@ nodes = [
       {"method": "POST", "url": SVC + "/process", "authentication": "genericCredentialType",
        "genericAuthType": "httpHeaderAuth", "sendBody": True, "specifyBody": "json", "jsonBody": "={{ JSON.stringify($json) }}",
        "options": {"timeout": 2400000}}, credentials=TOKEN_CRED, onError="continueRegularOutput"),
+    n("Fixed Monthly", "n8n-nodes-base.httpRequest", 4.2, [1100, -200],
+      {"method": "POST", "url": SVC + "/fixed", "authentication": "genericCredentialType",
+       "genericAuthType": "httpHeaderAuth", "sendBody": True, "specifyBody": "json",
+       "jsonBody": "={{ JSON.stringify({ month: $('Month Range').first().json.month }) }}", "options": {}},
+      credentials=TOKEN_CRED, executeOnce=True),
     n("Build Summary", "n8n-nodes-base.httpRequest", 4.2, [1100, 0],
       {"method": "POST", "url": SVC + "/summary", "authentication": "genericCredentialType",
        "genericAuthType": "httpHeaderAuth", "sendBody": True, "specifyBody": "json",
@@ -55,7 +60,7 @@ nodes = [
 c = {
     "Monthly Schedule": [["Month Range"]], "Run Now": [["Month Range"]], "Month Range": [["Bill Emails"]],
     "Bill Emails": [["To Email"]], "To Email": [["One At A Time"]],
-    "One At A Time": [["Build Summary"], ["Process Bill"]], "Process Bill": [["One At A Time"]],
+    "One At A Time": [["Fixed Monthly"], ["Process Bill"]], "Fixed Monthly": [["Build Summary"]], "Process Bill": [["One At A Time"]],
     "Build Summary": [["Email Owner"]],
 }
 connections = {k: {"main": [[{"node": t, "type": "main", "index": 0} for t in out] for out in v]} for k, v in c.items()}

@@ -30,9 +30,9 @@ def test_email_only_vendor_recorded_and_paid_by_ph27(tmp_path):
 
 def test_unlabeled_email_goes_to_review_then_can_be_resolved(tmp_path):
     l = Ledger(tmp_path)
-    assert process(Email("m2", "service@usaa.com", "Your renters policy bill", date(2026, 9, 1), "Your bill is ready."), RULES, l)["status"] == "needs_review"
-    r = process(Email("m2", "service@usaa.com", "Your renters policy bill", date(2026, 9, 1), "Amount due $68.52"), RULES, l)
-    assert r["status"] == "recorded" and r["share"] == "3.43"
+    assert process(Email("m2", "billing@1password.com", "Your invoice", date(2026, 9, 1), "Your bill is ready."), RULES, l)["status"] == "needs_review"
+    r = process(Email("m2", "billing@1password.com", "Your invoice", date(2026, 9, 1), "Total: $59.88"), RULES, l)
+    assert r["status"] == "recorded" and r["share"] == "29.94"
     assert [x["Status"] for x in l.rows()] == ["recorded"]
 
 
@@ -71,6 +71,6 @@ def test_forwarded_and_subject_filters():
     from bookkeeping.process import vendor_for
     assert vendor_for(RULES, "ivygahn@gmail.com", "Fwd: Your bill", "---------- Forwarded message ---------\nFrom: Pacific Power <noreply@pacificpower.net>")["key"] == "pacific_power"
     assert vendor_for(RULES, "ivygahn@gmail.com", "dinner?", "see you at 7") is None
-    assert vendor_for(RULES, "USAA.Customer.Service@mailcenter.usaa.com", "Deposit received", "") is None
-    assert vendor_for(RULES, "USAA.Customer.Service@mailcenter.usaa.com", "Your renters policy bill is ready", "")["key"] == "insurance"
+    assert vendor_for(RULES, "USAA.Customer.Service@mailcenter.usaa.com", "Deposit received", "") is None   # USAA is fixed monthly now
+    assert vendor_for(RULES, "support@namecheap.com", "Domain expiring soon", "") is None
     assert vendor_for(RULES, "invoice+statements@mail.anthropic.com", "Your receipt from Anthropic, PBC", "")["key"] == "claude"

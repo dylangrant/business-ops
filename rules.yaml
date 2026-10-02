@@ -13,18 +13,29 @@ home_office:
 # owner_paid: false = paid by ph27 directly (Bluevine); nothing is owed to the owner.
 # paid_from per owner 2026-09-30: everything BECU except Quantum Fiber (USAA, shared with Ivy); Bilt is a credit card, rent still from BECU. Subscriptions: fill in when known. vault: where the portal login lives.
 vendors:
-  - {key: rent,           match: [rent, bilt],                  category: Rent,                       share: "0.05", vault: utilities-expenses, paid_from: "BECU", senders: [bilt], start_url: "", portal: false}
+  - {key: rent,           match: [rent, bilt],                  category: Rent,                       share: "0.05", vault: utilities-expenses, paid_from: "BECU", portal: false}
   - {key: pacific_power,  match: [pacific power],               category: Utilities,                  share: "0.05", vault: utilities-expenses, paid_from: "BECU", senders: [pacificpower.net], start_url: "https://csapps.pacificpower.net/secure/my-account/billing-payment-history"}
   - {key: nw_natural,     match: [nw natural],                  category: Utilities,                  share: "0.05", vault: utilities-expenses, paid_from: "BECU", senders: [nwnatural.com], start_url: "https://ipn2.paymentus.com/cp/bills.action"}
   - {key: portland_water, match: [portland water],              category: Utilities,                  share: "0.05", vault: utilities-expenses, paid_from: "BECU", senders: [portlandoregon.gov], start_url: "https://css.portlandoregon.gov/css/account/accountTransaction"}
   - {key: internet,       match: [quantum fiber, centurylink, century link], category: Utilities,      share: "0.50", vault: utilities-expenses, note_label: internet, paid_from: "USAA (shared with Ivy)", senders: [quantumfiber.com, lumen.com, centurylink.com], start_url: "https://login.quantumfiber.com"}
-  - {key: insurance,      match: [insurance, usaa],                   category: Insurance (non-health),     share: "0.05", portal: false, paid_from: "BECU", senders: [usaa.com], subject: "(renters|insurance|policy).*(bill|due|payment|statement)|(bill|statement).*(renters|policy)"}
+  - {key: insurance,      match: [insurance, usaa],                   category: Insurance (non-health),     share: "0.05", portal: false, paid_from: "BECU"}
   - {key: t_mobile,       match: [t-mobile],                    category: Telephone,                  share: "0.25", vault: utilities-expenses, paid_from: "BECU", senders: [t-mobile.com], start_url: "https://account.t-mobile.com/"}
   - {key: onepassword,    match: [1password],                   category: Dues and Subscriptions,     share: "0.50", portal: false, senders: [1password.com]}
   - {key: claude,         match: [claude, anthropic],           category: Dues and Subscriptions,     share: "1.00", portal: false, owner_paid: false, paid_from: "Bluevine", senders: [anthropic.com], subject: "receipt|invoice"}
   - {key: namecheap,      match: [namecheap],                   category: Dues and Subscriptions,     share: "1.00", vault: ph27-ops, senders: [namecheap.com], subject: "order|receipt|invoice|renewed", portal: false}
   - {key: shopify,        match: [shopify],                     category: Dues and Subscriptions,     share: "1.00", vault: ph27-ops, senders: [shopify.com], portal: false}
   - {key: zenbusiness,    match: [zenbusiness],                 category: Legal and Professional,     share: "1.00", vault: ph27-ops, senders: [zenbusiness.com], portal: false}
+
+# Fixed monthly shares with no usable bill email (owner 2026-10-02). Recorded once per month by
+# POST /fixed. `rates` are effective-from months; a month before the first rate becomes needs_review.
+fixed_monthly:
+  - {key: rent,      name: Rent,                    vendor: rent,      day: 1,  document: "lease on file",
+     rates: [{from: "2025-04", amount: "3520.00"}]}
+  - {key: t_mobile,  name: T-Mobile,                vendor: t-mobile,  day: 15, document: "Venmo to brother (family plan share)", paid_from: "Venmo",
+     rates: [{from: "2025-04", amount: "15.00"}]}
+  - {key: insurance, name: USAA Renters Insurance,  vendor: insurance, day: 1,  document: "USAA policy (renters portion of bundled bill)",
+     # renters portion changes about every 6 months; 66.16 is the current contract. Add a row per change.
+     rates: [{from: "2026-10", amount: "66.16"}]}
 
 # Mixed orders (plan 002): the share applies to the business-item subtotal, by item category.
 mixed_vendors:
