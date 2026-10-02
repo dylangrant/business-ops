@@ -24,5 +24,7 @@ def test_record_month_and_idempotent(tmp_path):
 
 def test_month_before_first_rate_needs_review(tmp_path):
     l = Ledger(tmp_path)
-    r = {x["key"]: x for x in record_month(RULES, l, "2026-09")}
-    assert r["insurance"]["status"] == "needs_review" and r["rent"]["status"] == "recorded"
+    r = {x["key"]: x for x in record_month(RULES, l, "2025-03")}     # before ph27 existed: no rates
+    assert r["insurance"]["status"] == "needs_review" and r["rent"]["status"] == "needs_review"
+    r = {x["key"]: x for x in record_month(RULES, l, "2026-06")}
+    assert r["insurance"]["share"] == "3.43"

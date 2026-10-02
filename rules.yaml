@@ -35,7 +35,7 @@ fixed_monthly:
      rates: [{from: "2025-04", amount: "15.00"}]}
   - {key: insurance, name: USAA Renters Insurance,  vendor: insurance, day: 1,  document: "USAA policy (renters portion of bundled bill)",
      # renters portion changes about every 6 months; 66.16 is the current contract. Add a row per change.
-     rates: [{from: "2026-10", amount: "66.16"}]}
+     rates: [{from: "2025-04", amount: "68.52"}, {from: "2026-07", amount: "66.16"}]}  # July change per owner (approx.)
 
 # Mixed orders (plan 002): the share applies to the business-item subtotal, by item category.
 mixed_vendors:
