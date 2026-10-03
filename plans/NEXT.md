@@ -18,7 +18,6 @@ State 2026-10-03. Plan 001 Steps 1-5 built; nothing live yet.
   - USAA renters $68.52 through 2026-06, $66.16 from 2026-07 (changes about every 6 months; add a rate row when it does)
 
 ## Open
-- Merge ai-automations branch `claude_bizops_plan_01` (broker safety fixes; also protects the job flow).
 - Step 6 backfill Jan-Sep 2026: run `/fixed` per month, then the email intake per month. The utility emails before the forwarding filters may only be in Ivy's inbox, so expect gaps.
 - Summary email lists bill paths instead of attaching PDFs; no Gmail labels yet.
 
