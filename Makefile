@@ -1,5 +1,5 @@
 # ph27 business-ops. Every target is safe to run from a phone session (no prompts).
-.PHONY: help test deploy-service deploy-workflow deploy status trial-claude
+.PHONY: help test deploy-service deploy-workflow deploy status trial-claude backfill-fixed
 
 help:
 	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-16s %s\n", $$1, $$2}'
@@ -26,3 +26,10 @@ status: ## Health of the service, broker, gateway activity and loaded models
 trial-claude: ## Live trial: process the most recent Claude receipt into the ledger (needs MSG=<gmail id>)
 	@test -n "$(MSG)" || (echo "usage: make trial-claude MSG=<gmail message id> TEXT='Amount paid \$$20.00' DATE=2026-09-21"; exit 1)
 	@T=$$(grep ^BOOKKEEPING_TOKEN .env | cut -d= -f2); docker exec -e T=$$T n8n sh -c "wget -q -O- --header \"Authorization: Bearer \$$T\" --header 'Content-Type: application/json' --post-data '{\"email\":{\"id\":\"$(MSG)\",\"sender\":\"invoice+statements@mail.anthropic.com\",\"subject\":\"Your receipt from Anthropic\",\"date\":\"$(DATE)\",\"text\":\"$(TEXT)\"}}' http://ph27-bookkeeping:8091/process"; echo
+
+backfill-fixed: ## Record fixed monthly rows for a range, safe to re-run (FROM=2026-01 TO=2026-09, same year)
+	@test -n "$(FROM)" -a -n "$(TO)" || (echo "usage: make backfill-fixed FROM=2026-01 TO=2026-09"; exit 1)
+	@T=$$(grep ^BOOKKEEPING_TOKEN .env | cut -d= -f2); \
+	for mo in $$(uv run --quiet python -c "import sys; y,a=sys.argv[1].split('-'); b=sys.argv[2].split('-')[1]; print(' '.join(f'{y}-{m:02d}' for m in range(int(a), int(b)+1)))" $(FROM) $(TO)); do \
+	  $(if $(DRY),echo "would post $$mo",docker exec -e T=$$T n8n sh -c "wget -q -O- --header \"Authorization: Bearer \$$T\" --header 'Content-Type: application/json' --post-data '{\"month\":\"'$$mo'\"}' http://ph27-bookkeeping:8091/fixed"; echo " $$mo"); \
+	done

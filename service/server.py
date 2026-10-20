@@ -61,7 +61,8 @@ class H(BaseHTTPRequestHandler):
                 with LOCK:
                     return self._send(200, {"ok": True, **process(mail, load_rules(), Ledger(), fetcher(), MEDIA)})
             if self.path == "/fixed":
-                return self._send(200, {"ok": True, "entries": record_month(load_rules(), Ledger(), body["month"])})
+                with LOCK:      # same lock as /process: both rewrite the ledger file
+                    return self._send(200, {"ok": True, "entries": record_month(load_rules(), Ledger(), body["month"])})
             if self.path == "/summary":
                 return self._send(200, {"ok": True, **summary.build(Ledger(), body["month"])})
             return self._send(404, {"ok": False})
