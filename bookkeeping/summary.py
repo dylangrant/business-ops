@@ -30,16 +30,22 @@ def _attach(ledger: Ledger, docs: list[str]) -> tuple[list[dict], list[str], lis
     return attachments, missing, skipped
 
 
-def build(ledger: Ledger, month: str) -> dict:
-    """month = 'YYYY-MM'. Returns {subject, body, attachments} (attachments = [{filename, mimeType, data(base64)}] for that month's bill files)."""
-    rows = ledger.rows()
-    month_rows = [r for r in rows if r["Transaction Date"].startswith(month)]
-    recorded = [r for r in month_rows if r["Status"] == "recorded"]
-    review = [r for r in rows if r["Status"] == "needs_review"]          # all open reviews, any month
+def month_totals(rows: list[dict], month: str) -> dict:
+    """Shared by the email and /stats. Recorded rows of the month drive the money; needs_review rows (any month) are only listed."""
+    recorded = [r for r in rows if r["Transaction Date"].startswith(month) and r["Status"] == "recorded"]
+    review = [r for r in rows if r["Status"] == "needs_review"]
     by_cat: dict[str, Decimal] = defaultdict(Decimal)
     for r in recorded:
         by_cat[r["Category"]] += Decimal(r["Prorated Deductible Amount"])
     owed_month = sum((Decimal(r["Due To Owner"]) for r in recorded), Decimal("0"))
+    return {"recorded": recorded, "review": review, "by_cat": by_cat, "owed_month": owed_month,
+            "spend": sum(by_cat.values(), Decimal("0"))}
+
+
+def build(ledger: Ledger, month: str) -> dict:
+    """month = 'YYYY-MM'. Returns {subject, body, attachments} (attachments = [{filename, mimeType, data(base64)}] for that month's bill files)."""
+    totals = month_totals(ledger.rows(), month)
+    recorded, review, by_cat, owed_month = totals["recorded"], totals["review"], totals["by_cat"], totals["owed_month"]
     balance = ledger.balance_owed()
 
     lines = [f"ph27 bills for {month}", ""]
