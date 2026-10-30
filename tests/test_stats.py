@@ -10,7 +10,7 @@ import pytest
 
 from bookkeeping.allocate import load_rules
 from bookkeeping.ledger import Entry, Ledger
-from bookkeeping.stats import build
+from bookkeeping.stats import build, previous_month
 
 
 def add(l, **kw):
@@ -51,16 +51,22 @@ def test_needs_review_excluded_from_totals_but_counted(tmp_path):
     add(l, source="d", name="NW Natural", txn_date=date(2026, 9, 20), status="needs_review")
     s = build(l, RULES, "2026-09")
     assert s["business_spend"] == "27.28" and s["due_to_owner"] == "27.28" and s["needs_review"] == 1
-    assert "nw_natural" in s["missing_bills"]   # a review row is not a recorded bill
+    assert "nw_natural" in build(l, RULES, "2026-10")["missing_bills"]   # a review row is not a recorded bill
 
 
 def test_missing_bills(tmp_path):
     l = Ledger(tmp_path)
     add(l, source="a")
-    assert build(l, RULES, "2026-09")["missing_bills"] == ["Rent", "nw_natural"]
+    assert build(l, RULES, "2026-10")["missing_bills"] == ["Rent", "nw_natural"]
     add(l, source="fixed:rent:2026-09", name="Rent", category="Rent", txn_date=date(2026, 9, 1))
     add(l, source="n", name="NW Natural", txn_date=date(2026, 9, 12))
-    assert build(l, RULES, "2026-09")["missing_bills"] == []
+    assert build(l, RULES, "2026-10")["missing_bills"] == []
+    assert build(l, RULES, "2026-09")["missing_bills"] == ["Rent", "pacific_power", "nw_natural"]   # August has no rows
+
+
+def test_missing_bills_checks_previous_month():
+    assert previous_month("2026-10") == "2026-09"
+    assert previous_month("2026-01") == "2025-12"
 
 
 def test_real_rules_empty_month_lists_expected_bills(tmp_path):

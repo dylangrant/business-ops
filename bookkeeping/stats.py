@@ -24,12 +24,20 @@ def _present(item: dict, month: str, recorded: list[dict]) -> bool:
     return any(any(m in r["Name"].lower() for m in item["match"]) for r in recorded)
 
 
+def previous_month(month: str) -> str:
+    year, number = (int(part) for part in month.split("-"))
+    return f"{year - 1}-12" if number == 1 else f"{year}-{number - 1:02d}"
+
+
 def build(ledger: Ledger, rules: dict, month: str) -> dict:
-    """month = 'YYYY-MM'. Raises ValueError on a bad month."""
+    """month = 'YYYY-MM': totals for that month, missing bills for the month before
+    (this month's bills may not have arrived yet). Raises ValueError on a bad month."""
     if not isinstance(month, str) or not MONTH.match(month):
         raise ValueError("month must be YYYY-MM")
     totals = month_totals(ledger.rows(), month)
-    recorded = totals["recorded"]
-    missing = [item["name"] for item in _expected(rules) if not _present(item, month, recorded)]
+    bills_month = previous_month(month)
+    bills_recorded = month_totals(ledger.rows(), bills_month)["recorded"]
+    missing = [item["name"] for item in _expected(rules) if not _present(item, bills_month, bills_recorded)]
     return {"month": month, "business_spend": f"{totals['spend']:.2f}", "due_to_owner": f"{totals['owed_month']:.2f}",
-            "missing_bills": missing, "needs_review": len(totals["review"])}
+            "missing_bills": missing, "missing_bills_month": bills_month,
+            "needs_review": len(totals["review"])}
