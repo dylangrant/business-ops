@@ -14,8 +14,8 @@ from bookkeeping.stats import build
 
 
 def add(l, **kw):
-    base = dict(name="Pacific Power", category="Utilities", txn_date=date(2026, 9, 8), amount=Decimal("545.51"),
-                adjusted=Decimal("27.28"), deductible=Decimal("27.28"), due_to_owner=Decimal("27.28"))
+    base = {"name": "Pacific Power", "category": "Utilities", "txn_date": date(2026, 9, 8), "amount": Decimal("545.51"),
+                "adjusted": Decimal("27.28"), "deductible": Decimal("27.28"), "due_to_owner": Decimal("27.28")}
     l.add(Entry(**{**base, **kw}))
 
 
@@ -33,8 +33,8 @@ RULES = {
 def test_month_totals(tmp_path):
     l = Ledger(tmp_path)
     add(l, source="a")
-    add(l, source="c", name="Claude", category="Dues and Subscriptions", amount=Decimal("20"), adjusted=Decimal("20"),
-        deductible=Decimal("20"), due_to_owner=Decimal("0"), txn_date=date(2026, 9, 5))
+    add(l, source="c", name="Claude", category="Dues and Subscriptions", amount=Decimal(20), adjusted=Decimal(20),
+        deductible=Decimal(20), due_to_owner=Decimal(0), txn_date=date(2026, 9, 5))
     add(l, source="e", txn_date=date(2026, 8, 8))   # other month
     s = build(l, RULES, "2026-09")
     assert s["business_spend"] == "47.28" and s["due_to_owner"] == "27.28" and s["month"] == "2026-09"
