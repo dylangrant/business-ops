@@ -101,3 +101,7 @@ def test_month_range_invalid_falls_back_to_last_month(src):
     today = date.today()
     y, m = (today.year - 1, 12) if today.month == 1 else (today.year, today.month - 1)
     assert month_range(src)["month"] == f"{y}-{m:02d}"
+
+
+def test_timezone_is_pacific(wf):
+    assert wf["settings"]["timezone"] == "America/Los_Angeles"
