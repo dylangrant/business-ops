@@ -5,6 +5,7 @@ Schedule (3rd, 03:00) or manual -> last month's bill emails from rules.yaml send
 POST ph27-bookkeeping /process -> summary (bill files attached) -> email the owner. n8n holds no rules and no money logic.
 Deploy:  docker cp build/monthly_bills.json n8n:/tmp/m.json && docker exec n8n n8n import:workflow --input=/tmp/m.json
 (imports INACTIVE; activate only after the owner connects Gmail in the n8n UI.)
+Backfill webhook (POST {"month":"YYYY-MM"}) runs a past month and returns the summary without emailing.
 """
 import json
 import os
@@ -31,6 +32,9 @@ nodes = [
     n("Monthly Schedule", "n8n-nodes-base.scheduleTrigger", 1.2, [0, 0],
       {"rule": {"interval": [{"field": "cronExpression", "expression": "0 3 3 * *"}]}}),
     n("Run Now", "n8n-nodes-base.manualTrigger", 1, [0, 200], {}),
+    n("Backfill", "n8n-nodes-base.webhook", 2, [0, 400],
+      {"httpMethod": "POST", "path": "ph27-bills-backfill", "authentication": "headerAuth", "responseMode": "lastNode",
+       "options": {}}, credentials=TOKEN_CRED, webhookId="ph27-bills-backfill"),
     n("Month Range", "n8n-nodes-base.code", 2, [220, 100], {"jsCode": (HERE / "nodes_month_range.js").read_text()}),
     n("Bill Emails", "n8n-nodes-base.gmail", 2.1, [440, 100],
       {"resource": "message", "operation": "getAll", "returnAll": True, "simple": False,
@@ -54,17 +58,22 @@ nodes = [
       credentials=TOKEN_CRED, executeOnce=True),
     n("Attachments To Binary", "n8n-nodes-base.code", 2, [1320, 0],
       {"mode": "runOnceForAllItems", "jsCode": (HERE / "nodes_attachments.js").read_text()}),
-    n("Email Owner", "n8n-nodes-base.gmail", 2.1, [1540, 0],
+    n("Send Email?", "n8n-nodes-base.if", 2, [1540, 0],
+      {"conditions": {"options": {"caseSensitive": True, "leftValue": "", "typeValidation": "loose"},
+                      "conditions": [{"id": "not-backfill", "leftValue": "={{ $('Backfill').isExecuted }}",
+                                      "rightValue": False, "operator": {"type": "boolean", "operation": "equals"}}],
+                      "combinator": "and"}, "options": {}}),
+    n("Email Owner", "n8n-nodes-base.gmail", 2.1, [1760, -100],
       {"resource": "message", "operation": "send", "sendTo": OWNER, "subject": "={{ $json.subject }}",
        "emailType": "text", "message": "={{ $json.body }}",
        "options": {"appendAttribution": False,
                    "attachmentsUi": {"attachmentsBinary": [{"property": "={{ Object.keys($binary || {}).join(',') }}"}]}}}, credentials=GMAIL_CRED),
 ]
 c = {
-    "Monthly Schedule": [["Month Range"]], "Run Now": [["Month Range"]], "Month Range": [["Bill Emails"]],
+    "Monthly Schedule": [["Month Range"]], "Run Now": [["Month Range"]], "Backfill": [["Month Range"]], "Month Range": [["Bill Emails"]],
     "Bill Emails": [["To Email"]], "To Email": [["One At A Time"]],
     "One At A Time": [["Fixed Monthly"], ["Process Bill"]], "Fixed Monthly": [["Build Summary"]], "Process Bill": [["One At A Time"]],
-    "Build Summary": [["Attachments To Binary"]], "Attachments To Binary": [["Email Owner"]],
+    "Build Summary": [["Attachments To Binary"]], "Attachments To Binary": [["Send Email?"]], "Send Email?": [["Email Owner"], []],
 }
 connections = {k: {"main": [[{"node": t, "type": "main", "index": 0} for t in out] for out in v]} for k, v in c.items()}
 wf = {"id": "Ph27MonthlyBills", "name": "ph27 Monthly Bills", "active": False, "nodes": nodes, "connections": connections,
