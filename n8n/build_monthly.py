@@ -68,7 +68,7 @@ c = {
 }
 connections = {k: {"main": [[{"node": t, "type": "main", "index": 0} for t in out] for out in v]} for k, v in c.items()}
 wf = {"id": "Ph27MonthlyBills", "name": "ph27 Monthly Bills", "active": False, "nodes": nodes, "connections": connections,
-      "settings": {"executionOrder": "v1", "saveDataSuccessExecution": "none"}, "pinData": {}}
+      "settings": {"executionOrder": "v1", "saveDataSuccessExecution": "none", "timezone": "America/Los_Angeles"}, "pinData": {}}
 os.makedirs(HERE / "build", exist_ok=True)
 (HERE / "build" / "monthly_bills.json").write_text(json.dumps(wf, indent=2))
 print("built", len(nodes), "nodes;", len(senders), "senders")

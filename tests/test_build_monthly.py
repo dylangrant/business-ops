@@ -41,3 +41,10 @@ def test_attachments_js_builds_binary(wf):
     assert out == [{"json": {"subject": "s"}, "binary": {
         "attachment_0": {"data": "QQ==", "mimeType": "application/pdf", "fileName": "a.pdf"},
         "attachment_1": {"data": "Qg==", "mimeType": "text/plain", "fileName": "b.txt"}}}]
+
+
+def test_schedule_runs_in_pacific_time(wf):
+    # n8n defaults to UTC; without this the 03:00 run fires at 20:00 PT the day before.
+    assert wf["settings"]["timezone"] == "America/Los_Angeles"
+    trigger = next(n for n in wf["nodes"] if n["type"] == "n8n-nodes-base.scheduleTrigger")
+    assert trigger["parameters"]["rule"]["interval"][0]["expression"] == "0 3 3 * *"
