@@ -3,6 +3,7 @@
 POST /process  {"email": {id, sender, subject, date, text, links}}  -> process() result
 POST /fixed    {"month": "YYYY-MM"}                                  -> fixed monthly rows (rent, T-Mobile, renters)
 POST /summary  {"month": "YYYY-MM"}                                  -> {subject, body, attachments}
+POST /stats    {"month": "YYYY-MM"}                                  -> {month, business_spend, due_to_owner, missing_bills, needs_review}
 GET  /health
 """
 import hmac
@@ -13,7 +14,7 @@ from datetime import date
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-from bookkeeping import summary
+from bookkeeping import stats, summary
 from bookkeeping.allocate import load_rules
 from bookkeeping.fetch import Endpoints, Fetcher
 from bookkeeping.fixed import record_month
@@ -65,6 +66,11 @@ class H(BaseHTTPRequestHandler):
                     return self._send(200, {"ok": True, "entries": record_month(load_rules(), Ledger(), body["month"])})
             if self.path == "/summary":
                 return self._send(200, {"ok": True, **summary.build(Ledger(), body["month"])})
+            if self.path == "/stats":
+                try:
+                    return self._send(200, {"ok": True, **stats.build(Ledger(), load_rules(), body.get("month"))})
+                except ValueError as ex:
+                    return self._send(400, {"ok": False, "message": str(ex)})
             return self._send(404, {"ok": False})
         except Exception as ex:  # never leak a stack trace with bill data in it to n8n's execution log
             return self._send(200, {"ok": False, "status": "error", "message": f"{type(ex).__name__}: {str(ex)[:200]}"})
